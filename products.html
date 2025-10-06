@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Products — Little Sprouts</title>
+<style>
+  :root{--bg:#fff7fb;--card:#fff;--accent:#ff7aa2;--muted:#6b7280;--shadow:0 8px 20px rgba(16,24,40,0.06)}
+  *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;background:linear-gradient(180deg,#fff,#f6fbff);color:#0f172a}
+  header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center}
+  .brand{font-weight:800}
+  .container{padding:18px 6%}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);transition:transform .18s}
+  .card:hover{transform:translateY(-6px)}
+  img{width:100%;height:180px;object-fit:cover;border-radius:10px}
+  .price{font-weight:800}
+  .filters{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+  .btn{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  footer{padding:20px 6%;color:var(--muted);font-size:13px}
+  @media(max-width:640px){img{height:140px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Little Sprouts</div>
+  <nav>
+    <a href="index.html" style="margin-right:12px;color:#6b7280;text-decoration:none">Home</a>
+    <a href="checkout.html" style="color:#6b7280;text-decoration:none">Cart</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2 style="margin:0">All Products</h2>
+    <div class="filters">
+      <input id="search" placeholder="Search products..." style="padding:8px;border-radius:10px;border:1px solid #e6eef8">
+      <button class="btn" onclick="clearCart()">Clear Cart</button>
+    </div>
+  </div>
+  <div class="grid" id="list"></div>
+</div>
+
+<footer>© <span id="year"></span> Little Sprouts</footer>
+
+<script>
+const products = [
+  {id:1,name:"Dino T-shirt",desc:"Soft cotton tee with dino print",price:349,img:"https://via.placeholder.com/400x300?text=Dino+Tshirt"},
+  {id:2,name:"Flower Dress",desc:"Flowy summer dress",price:799,img:"https://via.placeholder.com/400x300?text=Flower+Dress"},
+  {id:3,name:"Cozy Jacket",desc:"Warm & comfy jacket",price:1299,img:"https://via.placeholder.com/400x300?text=Cozy+Jacket"},
+  {id:4,name:"Star Backpack",desc:"Lightweight backpack for school",price:699,img:"https://via.placeholder.com/400x300?text=Star+Backpack"},
+  {id:5,name:"Cute Cap",desc:"Adjustable cap with prints",price:249,img:"https://via.placeholder.com/400x300?text=Cute+Cap"},
+  {id:6,name:"Cartoon Socks Pack",desc:"3-pack colorful socks",price:199,img:"https://via.placeholder.com/400x300?text=Socks+Pack"}
+];
+
+function render(){
+  const grid = document.getElementById('list'); grid.innerHTML='';
+  products.forEach(p=>{
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `
+      <img src="${p.img}" alt="${p.name}">
+      <div style="margin-top:10px">
+        <div style="font-weight:800">${p.name}</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">${p.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <div class="price">₹${p.price}</div>
+          <div>
+            <button class="btn" onclick="addToCart(${p.id})" style="padding:8px 10px">Add to Cart</button>
+            <button style="margin-left:8px;padding:8px 10px;border-radius:10px;border:1px solid #e6eef8;background:#fff" onclick="buyNow(${p.id})">Buy Now</button>
+          </div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(c);
+  });
+}
+
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+  const exists = cart.find(i=>i.id===id);
+  if(exists) exists.qty += 1; else cart.push({...p, qty:1});
+  localStorage.setItem('cart', JSON.stringify(cart));
+  alert('Added to cart');
+}
+
+function buyNow(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  localStorage.setItem('cart', JSON.stringify([{...p, qty:1}]));
+  window.location.href = 'checkout.html';
+}
+
+function clearCart(){ localStorage.removeItem('cart'); alert('Cart cleared'); }
+
+document.getElementById('year').textContent = new Date().getFullYear();
+render();
+
+document.getElementById('search').addEventListener('input',e=>{
+  const q = e.target.value.toLowerCase();
+  const filtered = products.filter(p=>p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  const grid = document.getElementById('list'); grid.innerHTML='';
+  filtered.forEach(p=>{
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `<img src="${p.img}" alt="${p.name}"><div style="margin-top:10px"><div style="font-weight:800">${p.name}</div><div style="color:var(--muted);font-size:13px;margin-top:6px">${p.desc}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><div class="price">₹${p.price}</div><div><button class="btn" onclick="addToCart(${p.id})" style="padding:8px 10px">Add to Cart</button> <button style="margin-left:8px;padding:8px 10px;border-radius:10px;border:1px solid #e6eef8;background:#fff" onclick="buyNow(${p.id})">Buy Now</button></div></div></div>`;
+    grid.appendChild(c);
+  });
+});
+</script>
+</body>
+</html>
